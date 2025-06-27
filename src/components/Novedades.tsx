@@ -32,9 +32,15 @@ interface Novedad {
   created_by: string;
 }
 
+interface CatalogItem {
+  id: string;
+  nombre: string;
+}
+
 const Novedades: React.FC = () => {
   const { user, hasPermission } = useAuth();
   const [novedades, setNovedades] = useState<Novedad[]>([]);
+  const [tiposNovedad, setTiposNovedad] = useState<CatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingNovedad, setEditingNovedad] = useState<Novedad | null>(null);
@@ -47,12 +53,11 @@ const Novedades: React.FC = () => {
     hora_inicio: '',
     fecha_fin: '',
     hora_fin: '',
-    tipo_novedad: 'Permiso',
+    tipo_novedad: '',
     observacion: ''
   });
 
   const tiposPlanta = ['Docente', 'Administrativo', 'Aprendiz'];
-  const tiposNovedad = ['Permiso', 'Calamidad', 'Licencia', 'Ausencia', 'Otro'];
 
   useEffect(() => {
     loadNovedades();
@@ -61,13 +66,16 @@ const Novedades: React.FC = () => {
   const loadNovedades = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('novedades')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const [novedadesRes, tiposNovedadRes] = await Promise.all([
+        supabase.from('novedades').select('*').order('created_at', { ascending: false }),
+        supabase.from('tipos_novedad').select('*').eq('activo', true).order('nombre')
+      ]);
 
-      if (error) throw error;
-      setNovedades(data || []);
+      if (novedadesRes.error) throw novedadesRes.error;
+      if (tiposNovedadRes.error) throw tiposNovedadRes.error;
+
+      setNovedades(novedadesRes.data || []);
+      setTiposNovedad(tiposNovedadRes.data || []);
     } catch (error) {
       console.error('Error loading novedades:', error);
       toast.error('Error al cargar las novedades');
@@ -185,7 +193,7 @@ const Novedades: React.FC = () => {
       hora_inicio: '',
       fecha_fin: '',
       hora_fin: '',
-      tipo_novedad: 'Permiso',
+      tipo_novedad: '',
       observacion: ''
     });
   };
@@ -421,8 +429,11 @@ const Novedades: React.FC = () => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                       required
                     >
+                      <option value="">Seleccionar tipo de novedad</option>
                       {tiposNovedad.map(tipo => (
-                        <option key={tipo} value={tipo}>{tipo}</option>
+                        <option key={tipo.id} value={tipo.nombre}>
+                          {tipo.nombre}
+                        </option>
                       ))}
                     </select>
                   </div>
