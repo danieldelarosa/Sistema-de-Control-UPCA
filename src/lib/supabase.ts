@@ -166,6 +166,7 @@ export type Database = {
       enfermeria: {
         Row: {
           id: string;
+          cedula: string;
           nombre: string;
           cargo: string;
           dependencia: string;
@@ -177,6 +178,7 @@ export type Database = {
         };
         Insert: {
           id?: string;
+          cedula: string;
           nombre: string;
           cargo: string;
           dependencia: string;
@@ -188,6 +190,7 @@ export type Database = {
         };
         Update: {
           id?: string;
+          cedula?: string;
           nombre?: string;
           cargo?: string;
           dependencia?: string;

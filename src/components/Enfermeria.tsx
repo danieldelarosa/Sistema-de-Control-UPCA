@@ -17,6 +17,7 @@ import * as XLSX from 'xlsx';
 
 interface Enfermeria {
   id: string;
+  cedula: string;
   nombre: string;
   cargo: string;
   dependencia: string;
@@ -44,6 +45,7 @@ const Enfermeria: React.FC = () => {
   const [editingRecord, setEditingRecord] = useState<Enfermeria | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
+    cedula: '',
     nombre: '',
     cargo: '',
     dependencia: '',
@@ -135,6 +137,7 @@ const Enfermeria: React.FC = () => {
 
     setEditingRecord(record);
     setFormData({
+      cedula: record.cedula,
       nombre: record.nombre,
       cargo: record.cargo,
       dependencia: record.dependencia,
@@ -170,6 +173,7 @@ const Enfermeria: React.FC = () => {
 
   const resetForm = () => {
     setFormData({
+      cedula: '',
       nombre: '',
       cargo: '',
       dependencia: '',
@@ -188,6 +192,7 @@ const Enfermeria: React.FC = () => {
   };
 
   const filteredRecords = enfermeriaRecords.filter(record =>
+    record.cedula.toLowerCase().includes(searchTerm.toLowerCase()) ||
     record.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
     record.cargo.toLowerCase().includes(searchTerm.toLowerCase()) ||
     record.dependencia.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -249,7 +254,7 @@ const Enfermeria: React.FC = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <input
                 type="text"
-                placeholder="Buscar por nombre, cargo, dependencia o síntomas..."
+                placeholder="Buscar por número de cédula, nombre, cargo, dependencia o síntomas..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
@@ -291,8 +296,13 @@ const Enfermeria: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <User className="h-5 w-5 text-gray-400 mr-2" />
-                      <div className="text-sm font-medium text-gray-900">
-                        {record.nombre}
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {record.nombre}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          CC: {record.cedula}
+                        </div>
                       </div>
                     </div>
                   </td>
@@ -356,6 +366,19 @@ const Enfermeria: React.FC = () => {
               
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Número de Cédula *
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.cedula}
+                      onChange={(e) => setFormData({ ...formData, cedula: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      required
+                    />
+                  </div>
+                  
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Nombre Completo *
@@ -426,7 +449,7 @@ const Enfermeria: React.FC = () => {
                     </select>
                   </div>
                   
-                  <div className="md:col-span-2">
+                  <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Antecedentes de Salud *
                     </label>
